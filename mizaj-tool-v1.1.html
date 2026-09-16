@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>مزاج تشخیص — قانون مفرد اعضاء</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#F7EFDD;
+    --parchment-deep:#EFE3C6;
+    --ink:#2B211B;
+    --ink-soft:#5B4E42;
+    --green:#1F4B3F;
+    --green-deep:#163831;
+    --gold:#B8862E;
+    --gold-soft:#DDB96B;
+    --card:#FFFCF5;
+    --asabi:#3B5B6B;
+    --ghudadi:#C1791F;
+    --adalati:#8C3B2E;
+    --line:#E2D3AC;
+    --radius:18px;
+    --shadow:0 8px 24px rgba(31,75,63,.12);
+    font-size:16px;
+  }
+  html[data-fontsize="small"]{ font-size:14px; }
+  html[data-fontsize="medium"]{ font-size:17px; }
+  html[data-fontsize="large"]{ font-size:20px; }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:linear-gradient(180deg,#EFE7CE 0%,var(--parchment) 260px);
+    font-family:'Noto Nastaliq Urdu', serif;
+    color:var(--ink);
+    display:flex; justify-content:center;
+    min-height:100vh;
+  }
+  .app{
+    width:100%; max-width:460px; min-height:100vh;
+    background:transparent;
+    position:relative;
+    display:flex; flex-direction:column;
+    box-shadow:0 0 60px rgba(31,75,63,.15);
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    background:linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%);
+    color:var(--parchment);
+    padding:16px 18px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:10;
+    box-shadow:0 4px 16px rgba(0,0,0,.18);
+  }
+  .topbar .brand{ font-size:1.2rem; font-weight:700; letter-spacing:.02em; }
+  .topbar .brand small{ display:block; font-size:.64rem; opacity:.8; font-family:sans-serif; letter-spacing:.06em; margin-top:3px; }
+  .icon-btn{
+    background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28);
+    color:var(--parchment); border-radius:20px; padding:7px 14px;
+    font-size:.85rem; cursor:pointer; font-family:'Noto Nastaliq Urdu',serif;
+    backdrop-filter:blur(4px);
+  }
+
+  /* ---------- Creator credit (persistent, visible on scroll) ---------- */
+  .credit-strip{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--gold); color:#fff;
+    padding:9px 12px; font-size:.82rem; letter-spacing:.02em;
+    position:sticky; top:64px; z-index:9;
+  }
+  .credit-strip .name{ font-size:1.05rem; font-weight:700; }
+  .signature{
+    text-align:center; margin:26px 0 6px; color:var(--green-deep);
+  }
+  .signature .by{ font-size:.8rem; color:var(--ink-soft); font-family:sans-serif; letter-spacing:.05em; }
+  .signature .name{ font-size:1.6rem; font-weight:700; margin-top:2px; }
+
+  /* ---------- Screens ---------- */
+  .screen{ display:none; flex:1; flex-direction:column; padding:22px 20px 32px; animation:fade .25s ease; }
+  .screen.active{ display:flex; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* manuscript frame */
+  .frame{
+    border:1px solid var(--gold-soft);
+    border-radius:var(--radius);
+    padding:24px 20px;
+    position:relative;
+    background:var(--card);
+    box-shadow:var(--shadow);
+  }
+  .frame::before, .frame::after{
+    content:"";
+    position:absolute; width:26px; height:26px;
+    border:2px solid var(--gold);
+    opacity:.6;
+  }
+  .frame::before{ top:6px; right:6px; border-left:none; border-bottom:none; }
+  .frame::after{ bottom:6px; left:6px; border-right:none; border-top:none; }
+
+  h1.title{
+    font-size:1.7rem; margin:0 0 4px; color:var(--green-deep); text-align:center;
+  }
+  .subtitle{ text-align:center; color:var(--ink-soft); font-size:.9rem; margin-bottom:18px; }
+
+  .lead-line{ height:3px; width:56px; background:var(--gold); margin:0 auto 18px; border-radius:2px; }
+
+  p{ line-height:1.9; margin:0 0 14px; }
+  ul{ margin:0 0 14px; padding-inline-start:22px; line-height:1.9; }
+  strong{ color:var(--green-deep); }
+
+  .btn{
+    display:block; width:100%; text-align:center;
+    background:linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%);
+    color:var(--parchment);
+    border:none; border-radius:14px; padding:15px 16px;
+    font-family:'Noto Nastaliq Urdu',serif; font-size:1.05rem;
+    cursor:pointer; margin-top:10px;
+    box-shadow:0 6px 16px rgba(31,75,63,.28);
+    transition:transform .12s ease;
+  }
+  .btn:active{ transform:scale(.98); }
+  .btn.ghost{
+    background:transparent; color:var(--green); border:1.5px solid var(--green);
+    box-shadow:none;
+  }
+
+  .fontsize-row{
+    display:flex; gap:8px; justify-content:center; margin:14px 0 20px;
+  }
+  .fontsize-row button{
+    flex:1; padding:9px 0; border-radius:10px; border:1px solid var(--line);
+    background:var(--card); color:var(--ink); font-family:'Noto Nastaliq Urdu',serif;
+    cursor:pointer;
+  }
+  .fontsize-row button.active{ background:var(--gold); color:#fff; border-color:var(--gold); }
+
+  .notice{
+    background:var(--parchment-deep); border-right:4px solid var(--adalati);
+    border-radius:10px; padding:12px 14px; margin:14px 0; font-size:.92rem; line-height:1.8;
+  }
+  .notice.example{ border-right-color:var(--asabi); }
+
+  /* ---------- Question screen ---------- */
+  .progress-row{ display:flex; justify-content:center; gap:6px; margin-bottom:22px; }
+  .dot{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+  .dot.done{ background:var(--gold); }
+  .dot.current{ background:var(--green); }
+
+  .q-category{
+    text-align:center; font-size:.78rem; color:var(--ink-soft);
+    letter-spacing:.04em; margin-bottom:6px; font-family:sans-serif;
+  }
+  .q-text{ font-size:1.28rem; text-align:center; line-height:1.7; margin-bottom:22px; color:var(--ink); }
+
+  .option{
+    display:block; width:100%; text-align:right;
+    background:var(--card); border:1.5px solid var(--line); border-radius:14px;
+    padding:15px 17px; margin-bottom:10px; font-size:1rem;
+    font-family:'Noto Nastaliq Urdu',serif; color:var(--ink); cursor:pointer;
+    box-shadow:0 2px 8px rgba(43,33,27,.06);
+    transition:transform .1s ease, box-shadow .15s ease;
+  }
+  .option:active, .option.picked{ border-color:var(--gold); background:#FFF8E8; transform:scale(.99); }
+
+  .nav-row{ display:flex; justify-content:space-between; margin-top:auto; padding-top:18px; }
+  .link-btn{ background:none; border:none; color:var(--ink-soft); font-family:'Noto Nastaliq Urdu',serif; font-size:.95rem; cursor:pointer; }
+
+  /* ---------- Result screen ---------- */
+  .result-banner{
+    text-align:center; padding:30px 14px 24px; border-radius:var(--radius);
+    color:#fff; margin-bottom:18px;
+    box-shadow:var(--shadow);
+    background-image:linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,255,255,0) 60%);
+  }
+  .result-banner .label{ font-size:.85rem; opacity:.85; margin-bottom:6px; }
+  .result-banner .mizaj-name{ font-size:2.1rem; font-weight:700; }
+  .result-banner .quality{ margin-top:8px; font-size:.95rem; opacity:.9; }
+
+  .split-bar{ display:flex; height:10px; border-radius:6px; overflow:hidden; margin:14px 0 6px; }
+  .split-bar span{ height:100%; }
+  .split-legend{ display:flex; justify-content:space-between; font-size:.75rem; color:var(--ink-soft); font-family:sans-serif; margin-bottom:20px; }
+
+  .section-h{
+    font-size:1.05rem; color:var(--green-deep); margin:22px 0 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-h .bar{ width:4px; height:18px; background:var(--gold); border-radius:2px; }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+  .chip{ background:var(--parchment-deep); border-radius:20px; padding:7px 14px; font-size:.85rem; box-shadow:0 1px 4px rgba(43,33,27,.08); }
+
+  .accordion{ border:1px solid var(--line); border-radius:14px; margin-bottom:9px; overflow:hidden; background:var(--card); box-shadow:0 2px 8px rgba(43,33,27,.05); }
+  .accordion > summary{ padding:12px 14px; cursor:pointer; font-size:.95rem; list-style:none; display:flex; justify-content:space-between; }
+  .accordion > summary::-webkit-details-marker{ display:none; }
+  .accordion > summary::after{ content:"︿"; transform:rotate(180deg); color:var(--gold); }
+  .accordion[open] > summary::after{ transform:rotate(0deg); }
+  .accordion .acc-body{ padding:0 14px 14px; font-size:.9rem; line-height:1.85; color:var(--ink-soft); }
+
+  .warn-box{
+    background:#fff; border:1.5px dashed var(--adalati);
+    border-radius:12px; padding:14px 16px; margin-top:22px; font-size:.86rem; line-height:1.85; color:var(--ink-soft);
+  }
+  .warn-box strong{ color:var(--adalati); }
+
+  /* ---------- About screen ---------- */
+  .about-item{ margin-bottom:16px; }
+  .about-item h3{ font-size:1.02rem; color:var(--green-deep); margin:0 0 6px; }
+
+  footer.bottom-nav{
+    display:flex; flex-direction:column; border-top:1px solid var(--line); background:var(--card);
+  }
+  .nav-buttons{ display:flex; }
+  footer.bottom-nav button{
+    flex:1; border:none; background:none; padding:11px 0 9px; font-family:'Noto Nastaliq Urdu',serif;
+    color:var(--ink-soft); font-size:.85rem; cursor:pointer;
+  }
+  footer.bottom-nav button.active{ color:var(--green); font-weight:700; }
+  .footer-credit{
+    text-align:center; font-size:.72rem; color:var(--ink-soft); font-family:sans-serif;
+    padding:6px 0 10px; letter-spacing:.03em;
+  }
+  .footer-credit b{ color:var(--green-deep); font-family:'Noto Nastaliq Urdu',serif; font-size:.9rem; }
+
+  /* ---------- Logo mark (triad) ---------- */
+  .logo-mark{ display:inline-flex; align-items:center; justify-content:center; }
+  .logo-mark svg{ display:block; }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(22,56,49,.55);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:24px;
+    backdrop-filter:blur(2px);
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:var(--card); border-radius:20px; padding:26px 22px;
+    max-width:380px; width:100%; text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);
+    border:1px solid var(--gold-soft);
+  }
+  .modal-icon{ font-size:2.2rem; margin-bottom:8px; }
+  .modal-box h3{ color:var(--green-deep); margin:0 0 12px; font-size:1.2rem; }
+  .modal-box p{ text-align:right; }
+
+  /* ---------- Category icon badge ---------- */
+  .cat-badge{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin-bottom:8px;
+  }
+  .cat-badge .icon-circle{
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--parchment-deep); box-shadow:inset 0 0 0 1.5px var(--gold-soft);
+  }
+  .cat-badge .icon-circle svg{ width:18px; height:18px; stroke:var(--green-deep); }
+
+  .diet-icon{ display:inline-flex; vertical-align:-6px; margin-left:8px; }
+  .diet-icon svg{ width:18px; height:18px; stroke:var(--gold); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand" style="display:flex;align-items:center;gap:10px">
+      <span class="logo-mark" id="logo-mark-top" onclick="handleLogoTap()"></span>
+      <span>میزان مزاج<small>قانون مفرد اعضاء کے مطابق</small></span>
+    </div>
+    <button class="icon-btn" id="auth-btn" onclick="showScreen('about')">ⓘ تعارف</button>
+  </div>
+  <div class="credit-strip">تخلیق و ترتیب <span class="name">سعید احمد سہو</span></div>
+
+  <!-- ===================== ONBOARDING ===================== -->
+  <section class="screen active" id="screen-onboarding">
+    <div class="frame">
+      <div style="text-align:center;margin-bottom:8px" id="logo-mark-hero"></div>
+      <h1 class="title">مزاج تشخیص</h1>
+      <div class="lead-line"></div>
+      <p class="subtitle" style="margin-top:-8px">قانونِ مفرد اعضاء کی روشنی میں، آپ کے روزمرہ مشاہدات کی بنیاد پر</p>
+
+      <div class="fontsize-row">
+        <button data-size="small" onclick="setFontSize('small', this)">چھوٹا</button>
+        <button data-size="medium" class="active" onclick="setFontSize('medium', this)">درمیانہ</button>
+        <button data-size="large" onclick="setFontSize('large', this)">بڑا</button>
+      </div>
+
+      <p><strong>یہ ٹول کس لیے ہے؟</strong><br>
+      آپ کو آپ کے عمومی مزاجی رجحان سے آگاہ کرتا ہے، تاکہ آپ اسی کے مطابق غذائی مشورہ (علاج بالغذا) حاصل کر سکیں۔</p>
+
+      <div class="notice">
+        <strong>⚠️ یہ کیا نہیں ہے:</strong> کسی بیماری کی حتمی تشخیص نہیں، اور نہ ہی دوا کا متبادل۔ دوا شروع کرنے سے پہلے قریبی معالج سے مشورہ ضرور کریں۔
+      </div>
+
+      <div class="notice example">
+        <strong>علامت کی مدت کا اصول:</strong> کسی سوال کا جواب صرف اسی وقت دیں جب وہ کیفیت <strong>کم از کم پچھلے تین ماہ سے</strong> مسلسل محسوس ہو رہی ہو — کسی ایک دن کی عارضی حالت نہیں۔
+      </div>
+
+      <button class="btn" onclick="requireLoginThenStart()">آغاز کریں ←</button>
+    </div>
+  </section>
+
+  <!-- ===================== LOGIN ===================== -->
+  <section class="screen" id="screen-login">
+    <div class="frame" style="text-align:center">
+      <div style="font-size:2.2rem;margin-bottom:6px">🔐</div>
+      <h1 class="title" style="font-size:1.3rem">لاگ اِن کریں</h1>
+      <div class="lead-line"></div>
+      <p>یہ ٹول صرف رجسٹرڈ خریداروں کے لیے دستیاب ہے۔ جاری رکھنے کے لیے اپنے جی میل اکاؤنٹ سے لاگ اِن کریں۔</p>
+      <button class="btn" onclick="signInGoogle()">
+        <span style="display:inline-flex;align-items:center;gap:8px;justify-content:center">Google سے لاگ اِن کریں</span>
+      </button>
+      <div id="login-status" style="margin-top:14px;font-size:.88rem;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ADMIN (hidden) ===================== -->
+  <section class="screen" id="screen-admin">
+    <div class="frame">
+      <h1 class="title" style="font-size:1.3rem">ایڈمن پینل</h1>
+      <div class="lead-line"></div>
+      <div id="admin-gate">
+        <p>ایڈمن رسائی کے لیے اپنے مجاز جی میل اکاؤنٹ سے لاگ اِن کریں۔</p>
+        <button class="btn" onclick="signInGoogle()">Google سے لاگ اِن کریں</button>
+      </div>
+      <div id="admin-panel" style="display:none">
+        <p style="font-size:.85rem;color:var(--ink-soft)">لاگ اِن: <b id="admin-email"></b></p>
+        <div class="section-h"><span class="bar"></span>نیا خریدار شامل کریں</div>
+        <input type="email" id="admin-new-email" placeholder="جی میل ایڈریس لکھیں" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--line);font-family:sans-serif;margin-bottom:8px">
+        <button class="btn" onclick="adminAddEmail()">فہرست میں شامل کریں</button>
+        <div class="section-h"><span class="bar"></span>موجودہ فہرست</div>
+        <div id="admin-list"></div>
+      </div>
+      <button class="btn ghost" style="margin-top:20px" onclick="showScreen('onboarding')">واپس جائیں</button>
+    </div>
+  </section>
+
+  <!-- ===================== GENDER ===================== -->
+  <section class="screen" id="screen-gender">
+    <div class="frame">
+      <h1 class="title" style="font-size:1.3rem">پہلے یہ بتائیں</h1>
+      <div class="lead-line"></div>
+      <p class="subtitle" style="margin-top:-6px">تاکہ متعلقہ سوالات درست طور پر شامل ہو سکیں</p>
+      <button class="option" style="text-align:center;font-size:1.1rem;padding:18px" onclick="selectGender('مرد')">👤 مرد</button>
+      <button class="option" style="text-align:center;font-size:1.1rem;padding:18px" onclick="selectGender('عورت')">👤 عورت</button>
+    </div>
+  </section>
+
+  <!-- ===================== QUESTIONS ===================== -->
+  <section class="screen" id="screen-quiz">
+    <div class="progress-row" id="progress-row"></div>
+    <div class="q-category" id="q-category"></div>
+    <div class="q-text" id="q-text"></div>
+    <div id="q-options"></div>
+    <div class="nav-row">
+      <button class="link-btn" onclick="goBack()">◄ پچھلا سوال</button>
+      <button class="link-btn" onclick="skipQuestion()">اگلا سوال ►</button>
+    </div>
+  </section>
+
+  <!-- ===================== PULSE INTRO (optional) ===================== -->
+  <section class="screen" id="screen-pulse-intro">
+    <div class="frame">
+      <div class="cat-badge" style="margin-bottom:14px">${''}<span style="font-size:2rem">🫀</span></div>
+      <h1 class="title" style="font-size:1.4rem">نبض چیک کریں؟ (اختیاری)</h1>
+      <div class="lead-line"></div>
+      <p>اگر آپ چاہیں تو اپنی نبض چیک کر کے نتیجے کو مزید مضبوط بنا سکتے ہیں — یہ بالکل اختیاری ہے، اس کے بغیر بھی نتیجہ مکمل ملے گا۔</p>
+      <div class="notice example">
+        <strong>⚠️ لازمی شرط:</strong> نبض ہمیشہ پرسکون حالت میں چیک کریں — کم از کم 15 منٹ آرام کے بعد۔ بھاگ دوڑ، ورزش، کھانے یا غصے کے فوراً بعد نبض دیکھنا درست نتیجہ نہیں دیتا۔
+      </div>
+      <button class="btn" onclick="startPulse()">نبض چیک کریں ←</button>
+      <button class="btn ghost" onclick="showResult()">چھوڑیں، نتیجہ دیکھیں</button>
+    </div>
+  </section>
+
+  <!-- ===================== RESULT ===================== -->
+  <section class="screen" id="screen-result">
+    <div id="result-content"></div>
+  </section>
+
+  <!-- ===================== ABOUT ===================== -->
+  <section class="screen" id="screen-about">
+    <div class="frame">
+      <h1 class="title" style="font-size:1.4rem">تعارف و رہنما اصول</h1>
+      <div class="lead-line"></div>
+
+      <div class="about-item">
+        <h3>یہ نظام کیا ہے؟</h3>
+        <p>قانونِ مفرد اعضاء کے مطابق، انسانی جسم تین بنیادی نظاموں — اعصابی، غدی اور عضلاتی — پر مشتمل ہے۔ جب ان میں سے کوئی ایک نظام غیرمعمولی طور پر فعال ہو جائے تو اسے "تحریک" کہا جاتا ہے، جسے عام فہم میں "مزاج" بھی کہہ دیا جاتا ہے۔</p>
+      </div>
+
+      <div class="about-item">
+        <h3>طریقہ کار</h3>
+        <p>آپ کے روزمرہ مشاہدات (چہرہ، جلد، بھوک، پیاس، نیند، غصہ وغیرہ) سے متعلق سوالات کے جواب لیے جاتے ہیں۔ ہر جواب ایک مخصوص نظام کی طرف پوائنٹ کرتا ہے، اور آخر میں غالب رجحان کی بنیاد پر نتیجہ اخذ کیا جاتا ہے۔</p>
+      </div>
+
+      <div class="about-item">
+        <h3>سائنسی حیثیت</h3>
+        <p>یہ ایک روایتی طبی نظریہ ہے۔ جدید سائنسی تحقیق کے مطابق اس نوعیت کی خود تشخیص میں غلطی کا امکان رہتا ہے، خصوصاً بغیر کسی تربیت یافتہ معالج کی مدد کے۔ اسی لیے نتیجہ ہمیشہ ایک "عمومی رجحان" کے طور پر پیش کیا جاتا ہے۔</p>
+      </div>
+
+      <div class="warn-box">
+        <strong>اہم انتباہ:</strong> یہ تشخیص علاج بالغذا (غذائی رہنمائی) کے لیے ہے، کسی مرض کے علاج کا نکتہ آغاز نہیں۔ دوا سے علاج شروع کرنے سے پہلے ہمیشہ قریبی معالج سے مشورہ کریں۔ غلط یا جلدبازی میں دی گئی معلومات نتیجے کو غلط بنا سکتی ہیں۔
+      </div>
+
+      <button class="btn ghost" onclick="showScreen('onboarding')">واپس جائیں</button>
+    </div>
+  </section>
+
+  <footer class="bottom-nav">
+    <div class="nav-buttons">
+      <button onclick="showScreen('onboarding')" id="nav-home">آغاز</button>
+      <button onclick="showScreen('about')" id="nav-about">تعارف</button>
+    </div>
+  </footer>
+
+  <!-- ===================== MODAL: 3-month rule ===================== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-icon">⏳</div>
+      <h3>شروع کرنے سے پہلے</h3>
+      <p>سوالات کا جواب صرف اُن علامات کی بنیاد پر دیں جو آپ <strong>پچھلے تین ماہ یا اس سے زائد عرصے سے</strong> اپنے جسم میں مسلسل یا بار بار محسوس کر رہے ہیں — کسی ایک دن یا عارضی کیفیت کی بنیاد پر نہیں۔</p>
+      <p style="font-size:.85rem;color:var(--ink-soft)">اس اصول پر عمل سے مزاج شناسی زیادہ آسان اور درست ہو جاتی ہے۔</p>
+      <button class="btn" onclick="confirmStart()">سمجھ گیا، آغاز کریں</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- Graphics: logo mark + category icons ---------------- */
+const LOGO_SVG = `
+<svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+  <circle cx="23" cy="14" r="8" fill="var(--asabi)" opacity="0.9"/>
+  <circle cx="14" cy="29" r="8" fill="var(--ghudadi)" opacity="0.9"/>
+  <circle cx="32" cy="29" r="8" fill="var(--adalati)" opacity="0.9"/>
+  <circle cx="23" cy="24" r="4" fill="#fff" opacity="0.9"/>
+</svg>`;
+
+const ICONS = {
+  "چہرہ": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><path d="M9 15c1 1 5 1 6 0"/></svg>`,
+  "آنکھیں": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg>`,
+  "زبان": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M6 4h12v9a6 6 0 0 1-12 0V4z"/><path d="M12 13v6"/></svg>`,
+  "ناک": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10a3 3 0 0 0 6 0"/><path d="M6 13a3 3 0 0 0 6 0"/></svg>`,
+  "کان": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14a5 5 0 1 1 5 5c-1 0-2-.5-2-2v-1"/><path d="M8 14c0-4 2-8 6-8a5 5 0 0 1 5 5c0 2-1 3-2 4"/></svg>`,
+  "جسم": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12.5V6a1.5 1.5 0 0 1 3 0v9c0 3.5-2 6.5-6 6.5S5 18 5 15v-3l1.5-1.5"/></svg>`,
+  "جلد": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="9" r=".6" fill="currentColor"/><circle cx="14" cy="8" r=".6" fill="currentColor"/><circle cx="17" cy="13" r=".6" fill="currentColor"/><circle cx="9" cy="15" r=".6" fill="currentColor"/><circle cx="14" cy="16" r=".6" fill="currentColor"/></svg>`,
+  "نیند": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 11.5 3a7 7 0 0 0 9.5 9.5z"/></svg>`,
+  "رویہ": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="6" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>`,
+  "ہاضمہ": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M6 3v6a3 3 0 0 0 3 3v9"/><path d="M6 3v6M9 3v6"/><path d="M17 3c-2 0-3 2-3 5s1 4 3 4v9"/></svg>`,
+  "پیشاب": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s5 5.5 5 9a5 5 0 0 1-10 0c0-3.5 5-9 5-9z"/></svg>`,
+  "دیگر علامات": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 3v9l6 3"/></svg>`,
+  "خواتین": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5"/><path d="M12 14v7M9 18h6"/></svg>`,
+  "ذائقہ": `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 4 0 0 0 16 0"/><path d="M4 12a8 4 0 0 1 16 0"/></svg>`
+};
+
+const DIET_ICONS = {
+  meat: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 15c-3 0-5-2-5-5a5 5 0 0 1 9-3l6 6a3 3 0 0 1-4 4l-2-2"/><path d="M8 15l3 3"/></svg>`,
+  grain: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20"/><path d="M12 6c-3 0-5 2-5 4s2 2 5 2 5 0 5-2-2-4-5-4z"/><path d="M12 12c-2.5 0-4 1.5-4 3.5S9.5 19 12 19s4-1.5 4-3.5S14.5 12 12 12z"/></svg>`,
+  veg: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12a7 7 0 0 1 14 0c0 4-3 8-7 9-4-1-7-5-7-9z"/><path d="M12 5V2"/></svg>`,
+  fruit: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="14" r="7"/><path d="M12 7c0-2 1-4 3-4"/></svg>`,
+  qahwa: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3c0 1-1 1-1 2s1 1 1 2"/><path d="M12 3c0 1-1 1-1 2s1 1 1 2"/></svg>`
+};
+
+function iconCircle(catName){
+  const svg = ICONS[catName] || ICONS["رویہ"];
+  return `<span class="icon-circle">${svg}</span>`;
+}
+
+/* ---------------- Modal ---------------- */
+function openStartModal(){
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function confirmStart(){
+  document.getElementById('modal-overlay').classList.remove('show');
+  showScreen('gender');
+}
+function selectGender(g){
+  gender = g;
+  startQuiz();
+}
+
+/* ---------------- Font size ---------------- */
+function setFontSize(size, btn){
+  document.documentElement.setAttribute('data-fontsize', size);
+  document.querySelectorAll('.fontsize-row button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+/* ---------------- Screen switching ---------------- */
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ---------------- Sample question set (curated, book-derived) ---------------- */
+/* each option: {text, points:{asabi,ghudadi,adalati}} */
+const questions = [
+  /* ===== چہرہ ===== */
+  { cat:"چہرہ", text:"چہرے کا رنگ عموماً کیسا ہے؟",
+    options:[
+      {t:"سفید یا پھیکا", p:{asabi:1}},
+      {t:"گندمی یا سیاہی مائل", p:{adalati:1}},
+      {t:"زردی مائل", p:{ghudadi:1}}
+    ]},
+  { cat:"چہرہ", text:"چہرہ عموماً کیسا رہتا ہے؟",
+    options:[
+      {t:"نرم اور چمکدار", p:{asabi:1}},
+      {t:"خشک اور بے رونق", p:{adalati:1}},
+      {t:"سرخی مائل یا گرم", p:{ghudadi:1}}
+    ]},
+  { cat:"چہرہ", text:"چہرے/جسم پر بالوں کی مقدار کیسی ہے؟",
+    options:[
+      {t:"گھنے بال", p:{adalati:1}},
+      {t:"بہت کم یا نہ ہونے کے برابر", p:{asabi:1}},
+      {t:"عام مقدار", p:{}}
+    ]},
+  { cat:"چہرہ", text:"آنکھوں کے نیچے سیاہ حلقے رہتے ہیں؟",
+    options:[{t:"ہاں", p:{adalati:1}}, {t:"نہیں", p:{}}]},
+  { cat:"چہرہ", text:"چہرے پر سیاہ داغ یا مہاسے زیادہ ہیں؟",
+    options:[{t:"ہاں", p:{adalati:1}}, {t:"نہیں", p:{}}]},
+
+  /* ===== آنکھیں، ناک، کان ===== */
+  { cat:"آنکھیں", text:"آنکھوں کی حالت کیسی رہتی ہے؟",
+    options:[
+      {t:"ڈھیلے پن، پانی دار", p:{asabi:1}},
+      {t:"خشک اور کمزور نظر", p:{adalati:1}},
+      {t:"سرخی مائل یا جلن والی", p:{ghudadi:1}}
+    ]},
+  { cat:"ناک", text:"زکام کی نوعیت کیسی ہوتی ہے؟",
+    options:[
+      {t:"سفید، پتلی رطوبت", p:{asabi:1}},
+      {t:"گاڑھی، پیلے رنگ کی", p:{ghudadi:1}},
+      {t:"شاذ و نادر ہوتا ہے", p:{}}
+    ]},
+  { cat:"کان", text:"کانوں میں بھرائی یا آوازیں محسوس ہوتی ہیں؟",
+    options:[
+      {t:"بھرائی اور بہرا پن جیسا احساس", p:{asabi:1}},
+      {t:"خشک پن یا طنین (بجنے کی آواز)", p:{adalati:1}},
+      {t:"گرم پن یا دباؤ", p:{ghudadi:1}},
+      {t:"عام", p:{}}
+    ]},
+
+  /* ===== زبان و ذائقہ ===== */
+  { cat:"زبان", text:"زبان پر تہہ کا رنگ عموماً کیسا رہتا ہے؟",
+    options:[
+      {t:"سفید تہہ", p:{asabi:1}},
+      {t:"سرخی مائل", p:{adalati:1}},
+      {t:"پیلی تہہ", p:{ghudadi:1}},
+      {t:"صاف زبان", p:{}}
+    ]},
+  { cat:"زبان", text:"منہ کا ذائقہ عموماً کیسا رہتا ہے؟",
+    options:[
+      {t:"عام یا ہلکا میٹھا", p:{asabi:1}},
+      {t:"ترش", p:{adalati:1}},
+      {t:"کڑوا یا نمکین", p:{ghudadi:1}}
+    ]},
+  { cat:"زبان", text:"منہ سے بو کیسی آتی ہے؟",
+    options:[
+      {t:"نہیں یا ہلکی", p:{asabi:1}},
+      {t:"خشک قسم کی بو", p:{adalati:1}},
+      {t:"تیز اور گرم بو", p:{ghudadi:1}}
+    ]},
+
+  /* ===== جسمانی ساخت و احساس ===== */
+  { cat:"جسم", text:"جسم کی ساخت کیسی ہے؟",
+    options:[
+      {t:"فربہ، نرم، چربی والا", p:{asabi:1}},
+      {t:"دبلا، خشک، پتلا", p:{adalati:1}},
+      {t:"درمیانی مگر گرم محسوس ہوتا ہے", p:{ghudadi:1}}
+    ]},
+  { cat:"جسم", text:"جسم عموماً کیسا محسوس ہوتا ہے؟",
+    options:[
+      {t:"سردی زیادہ محسوس ہوتی ہے", p:{asabi:1}},
+      {t:"خشکی محسوس ہوتی ہے", p:{adalati:1}},
+      {t:"گرمی یا تپش محسوس ہوتی ہے", p:{ghudadi:1}}
+    ]},
+  { cat:"جسم", text:"ہاتھ پاؤں عموماً کیسے رہتے ہیں؟",
+    options:[
+      {t:"ٹھنڈے", p:{asabi:1}},
+      {t:"خشک یا کھردرے", p:{adalati:1}},
+      {t:"گرم", p:{ghudadi:1}}
+    ]},
+  { cat:"جسم", text:"پسینہ کن حالات میں زیادہ آتا ہے؟",
+    options:[
+      {t:"آرام کی حالت میں بھی", p:{asabi:1}},
+      {t:"حرکت یا ورزش سے", p:{adalati:1}},
+      {t:"گرمی/موسمِ گرما میں", p:{ghudadi:1}}
+    ]},
+  { cat:"جسم", text:"ناخنوں کی حالت کیسی ہے؟",
+    options:[
+      {t:"نرم اور سفید", p:{asabi:1}},
+      {t:"خشک، ٹوٹنے والے یا سیاہ لکیریں", p:{adalati:1}},
+      {t:"سرخی مائل یا گرم محسوس ہوتے ہیں", p:{ghudadi:1}}
+    ]},
+  { cat:"جسم", text:"بالوں کی حالت کیسی ہے؟",
+    options:[
+      {t:"جلدی سفید ہو جاتے ہیں", p:{asabi:1}},
+      {t:"زیادہ جھڑتے ہیں یا گنج پن", p:{adalati:1}},
+      {t:"موٹے اور سیاہ رہتے ہیں", p:{ghudadi:1}},
+      {t:"عام", p:{}}
+    ]},
+  { cat:"جسم", text:"جسمانی طاقت کیسی محسوس ہوتی ہے؟",
+    options:[
+      {t:"کمزوری اور سستی زیادہ", p:{asabi:1}},
+      {t:"طاقت ہے مگر خشکی محسوس ہوتی ہے", p:{adalati:1}},
+      {t:"گرم طاقت اور بے چینی", p:{ghudadi:1}}
+    ]},
+  { cat:"جسم", text:"ورزش یا محنت کے بعد جسم کیسا محسوس ہوتا ہے؟",
+    options:[
+      {t:"بہت تھکاوٹ اور سستی", p:{asabi:1}},
+      {t:"خشک پن اور اکڑاہٹ", p:{adalati:1}},
+      {t:"گرمی اور پسینہ زیادہ", p:{ghudadi:1}}
+    ]},
+
+  /* ===== جلد ===== */
+  { cat:"جلد", text:"جلد کی عمومی ساخت کیسی ہے؟",
+    options:[
+      {t:"نرم اور چربی والی", p:{asabi:1}},
+      {t:"خشک، کھردری، خارش والی", p:{adalati:1}},
+      {t:"گرم اور سرخی مائل", p:{ghudadi:1}}
+    ]},
+  { cat:"جلد", text:"جلد پر خارش ہو تو کیسی ہوتی ہے؟",
+    options:[
+      {t:"نہیں ہوتی یا بہت کم", p:{asabi:1}},
+      {t:"خشک خارش، دانے دیر سے پکتے ہیں", p:{adalati:1}},
+      {t:"سرخ، گرم اور جلن والی", p:{ghudadi:1}}
+    ]},
+  { cat:"جلد", text:"جسم پر پھنسیاں/پھوڑے نکلیں تو کیسے ہوتے ہیں؟",
+    options:[
+      {t:"سفید یا پانی دار", p:{asabi:1}},
+      {t:"خشک اور سخت", p:{adalati:1}},
+      {t:"سرخ، پیپ والے یا جلن والے", p:{ghudadi:1}}
+    ]},
+  { cat:"جلد", text:"جسم میں ورم یا سوجن ہو تو کیسی ہوتی ہے؟",
+    options:[
+      {t:"نرم اور ٹھنڈی سوجن", p:{asabi:1}},
+      {t:"سخت اور خشک سوجن", p:{adalati:1}},
+      {t:"گرم اور سرخ سوجن", p:{ghudadi:1}},
+      {t:"سوجن نہیں رہتی", p:{}}
+    ]},
+
+  /* ===== نیند و خواب ===== */
+  { cat:"نیند", text:"نیند کیسی آتی ہے؟",
+    options:[
+      {t:"بہت زیادہ اور گہری", p:{asabi:1}},
+      {t:"کم یا بے چینی والی", p:{adalati:1}},
+      {t:"بے چین نیند، بار بار آنکھ کھلنا", p:{ghudadi:1}}
+    ]},
+  { cat:"نیند", text:"خواب عموماً کیسے آتے ہیں؟",
+    options:[
+      {t:"پانی والے یا پرسکون خواب", p:{asabi:1}},
+      {t:"ڈراؤنے، سیاہ چیزوں والے خواب", p:{adalati:1}},
+      {t:"آگ، روشنی یا تیز رفتار خواب", p:{ghudadi:1}},
+      {t:"خواب یاد نہیں رہتے", p:{}}
+    ]},
+  { cat:"نیند", text:"صبح اٹھنے کا دل کرتا ہے؟",
+    options:[
+      {t:"نہیں، اٹھنے کو جی نہیں کرتا", p:{asabi:1}},
+      {t:"جلدی اٹھ جاتے ہیں", p:{ghudadi:1}},
+      {t:"عام", p:{}}
+    ]},
+
+  /* ===== نفسیاتی و رویہ ===== */
+  { cat:"رویہ", text:"غصہ کیسا آتا ہے؟",
+    options:[
+      {t:"بہت مشکل سے آتا ہے", p:{asabi:1}},
+      {t:"اندر ہی اندر رہتا ہے، ظاہر کم ہوتا ہے", p:{adalati:1}},
+      {t:"جلدی اور تیزی سے آتا ہے", p:{ghudadi:1}}
+    ]},
+  { cat:"رویہ", text:"بات چیت کا انداز کیسا ہے؟",
+    options:[
+      {t:"دھیمی اور آہستہ", p:{asabi:1}},
+      {t:"کم بات کرتے ہیں", p:{adalati:1}},
+      {t:"تیز تیز اور صاف", p:{ghudadi:1}}
+    ]},
+  { cat:"رویہ", text:"خوف یا پریشانی کیسے محسوس ہوتی ہے؟",
+    options:[
+      {t:"خوف زیادہ لگتا ہے", p:{asabi:1}},
+      {t:"سوچ و بچار اور غم زیادہ رہتا ہے", p:{adalati:1}},
+      {t:"گھبراہٹ اور بے چینی زیادہ", p:{ghudadi:1}}
+    ]},
+  { cat:"رویہ", text:"فیصلے کرنے میں کیسا محسوس کرتے ہیں؟",
+    options:[
+      {t:"سست اور دیر کرتے ہیں", p:{asabi:1}},
+      {t:"بہت سوچ بچار کے بعد فیصلہ", p:{adalati:1}},
+      {t:"جلدی اور تیزی سے فیصلہ", p:{ghudadi:1}}
+    ]},
+  { cat:"رویہ", text:"لوگوں سے ملنے جلنے کا انداز کیسا ہے؟",
+    options:[
+      {t:"نرم اور خاموش مزاج", p:{asabi:1}},
+      {t:"کم ملتے ہیں، تنہائی پسند", p:{adalati:1}},
+      {t:"تیز اور جذباتی انداز", p:{ghudadi:1}}
+    ]},
+  { cat:"رویہ", text:"کام کرنے کا انداز کیسا ہے؟",
+    options:[
+      {t:"سست اور کاہلی والا", p:{asabi:1}},
+      {t:"مستقل و محنتی مگر خشک مزاج", p:{adalati:1}},
+      {t:"تیز اور جلدی باز", p:{ghudadi:1}}
+    ]},
+  { cat:"رویہ", text:"بھول جانے یا پرانی باتیں یاد نہ رہنے کی شکایت ہے؟",
+    options:[{t:"ہاں، اکثر", p:{adalati:1}}, {t:"نہیں", p:{}}]},
+
+  /* ===== ہاضمہ و بھوک و پیاس ===== */
+  { cat:"ہاضمہ", text:"بھوک کا عمومی انداز کیا ہے؟",
+    options:[
+      {t:"کم ہے یا بند رہتی ہے", p:{asabi:1}},
+      {t:"بہت زیادہ رہتی ہے، کھانے کے بعد بھی محسوس ہوتی ہے", p:{adalati:1}},
+      {t:"پیٹ میں اپھار محسوس ہوتا ہے، بھوک تقریباً بند", p:{ghudadi:1}},
+      {t:"معتدل", p:{}}
+    ]},
+  { cat:"ہاضمہ", text:"پیاس لگتے وقت عموماً کیا محسوس ہوتا ہے؟",
+    options:[
+      {t:"دیر سے لگتی ہے، پھر اچانک شدید، ٹھنڈا پانی پینے سے ختم نہیں ہوتی", p:{asabi:1}},
+      {t:"خشکی سے لگتی ہے، پانی پیتے ہی ختم ہو جاتی ہے", p:{adalati:1}},
+      {t:"گرمی/جلن سے لگتی ہے، ٹھنڈا پانی فوراً سکون دیتا ہے", p:{ghudadi:1}},
+      {t:"عمومی", p:{}}
+    ]},
+  { cat:"ہاضمہ", text:"معدے میں جلن یا تیزابیت محسوس ہوتی ہے؟",
+    options:[
+      {t:"نہیں", p:{asabi:1}},
+      {t:"ہاں، ترش ڈکار کے ساتھ", p:{adalati:1}},
+      {t:"ہاں، تیز جلن اور پیاس کے ساتھ", p:{ghudadi:1}}
+    ]},
+  { cat:"ہاضمہ", text:"قبض کا مسئلہ رہتا ہے؟",
+    options:[
+      {t:"نہیں، فضلات نرم رہتے ہیں", p:{asabi:1}},
+      {t:"شدید قبض رہتا ہے", p:{adalati:1}},
+      {t:"کبھی قبض کبھی نرم", p:{ghudadi:1}}
+    ]},
+  { cat:"ہاضمہ", text:"پیٹ میں گیس یا ریاح کی شکایت رہتی ہے؟",
+    options:[
+      {t:"نرم مگر زیادہ گیس", p:{asabi:1}},
+      {t:"خشک گیس، آواز کے ساتھ خارج ہوتی ہے", p:{adalati:1}},
+      {t:"گرم اور جلن والی گیس", p:{ghudadi:1}}
+    ]},
+  { cat:"ہاضمہ", text:"فضلات (پاخانہ) کی قوام کیسی ہوتی ہے؟",
+    options:[
+      {t:"نرم یا پانی دار", p:{asabi:1}},
+      {t:"سخت اور خشک", p:{adalati:1}},
+      {t:"گرم، زرد اور جلن والا", p:{ghudadi:1}}
+    ]},
+  { cat:"ہاضمہ", text:"تھکن زیادہ تر کس صورت میں محسوس ہوتی ہے؟",
+    options:[
+      {t:"بغیر مشقت کے، ذہنی/جذباتی وجہ سے", p:{asabi:1}},
+      {t:"جسمانی مشقت، چلنے دوڑنے سے", p:{adalati:1}},
+      {t:"زیادہ کھانے یا ہاضمے کے بوجھ سے", p:{ghudadi:1}}
+    ]},
+
+  /* ===== فضلات (پیشاب) ===== */
+  { cat:"پیشاب", text:"پیشاب کی مقدار کیسی ہوتی ہے؟",
+    options:[
+      {t:"زیادہ", p:{asabi:1}},
+      {t:"کم", p:{adalati:1}},
+      {t:"قطرہ قطرہ آتا ہے", p:{ghudadi:1}}
+    ]},
+  { cat:"پیشاب", text:"پیشاب کا رنگ کیسا ہوتا ہے؟",
+    options:[
+      {t:"سفید یا پانی جیسا", p:{asabi:1}},
+      {t:"سرخ یا گلابی مائل", p:{adalati:1}},
+      {t:"گہرا پیلا، زرد یا زعفرانی", p:{ghudadi:1}}
+    ]},
+  { cat:"پیشاب", text:"پیشاب میں جلن محسوس ہوتی ہے؟",
+    options:[
+      {t:"نہیں", p:{asabi:1}},
+      {t:"ہاں، زیادہ جلن", p:{ghudadi:1}}
+    ]},
+
+  /* ===== سر، سانس، جوڑ ===== */
+  { cat:"دیگر علامات", text:"سر میں درد ہو تو کیسا ہوتا ہے؟",
+    options:[
+      {t:"بھاری پن اور نیند آور", p:{asabi:1}},
+      {t:"خشک اور دباؤ والا", p:{adalati:1}},
+      {t:"تیز اور گرم درد", p:{ghudadi:1}}
+    ]},
+  { cat:"دیگر علامات", text:"سانس پھولنے یا دمہ جیسی شکایت ہے؟",
+    options:[
+      {t:"ہاں، بلغم والا", p:{asabi:1}},
+      {t:"ہاں، خشک والا", p:{adalati:1}},
+      {t:"ہاں، گرم والا", p:{ghudadi:1}},
+      {t:"نہیں", p:{}}
+    ]},
+  { cat:"دیگر علامات", text:"جوڑوں میں درد یا سوجن رہتی ہے؟",
+    options:[{t:"ہاں", p:{adalati:1}}, {t:"نہیں", p:{}}]},
+  { cat:"دیگر علامات", text:"جسم میں تپش یا چنگاریاں سی محسوس ہوتی ہیں؟",
+    options:[{t:"ہاں", p:{ghudadi:1}}, {t:"نہیں", p:{}}]},
+
+  /* ===== ذائقہ ===== */
+  { cat:"ذائقہ", text:"عموماً کون سا ذائقہ زیادہ پسند ہے؟",
+    options:[
+      {t:"پھیکا یا کسیلا", p:{asabi:1}},
+      {t:"میٹھا", p:{asabi:1}},
+      {t:"نمکین یا چرپرا", p:{ghudadi:1}},
+      {t:"ترش یا کڑوا", p:{adalati:1}}
+    ]},
+];
+
+let current = 0;
+let answers = [];
+let scores = {asabi:0, ghudadi:0, adalati:0};
+let mode = 'symptom';
+let pulseCurrent = 0;
+let pulseAnswers = [];
+let pulseScores = {asabi:0, ghudadi:0, adalati:0};
+let gender = null;
+let activeQuestions = [];
+
+const womenQuestions = [
+  { cat:"خواتین", text:"ماہواری (حیض) کیسی رہتی ہے؟",
+    options:[
+      {t:"نہیں آتی یا بہت کم", p:{asabi:1}},
+      {t:"تکلیف اور درد کے ساتھ آتی ہے", p:{ghudadi:1}},
+      {t:"بے قاعدہ رہتی ہے", p:{adalati:1}},
+      {t:"عام", p:{}}
+    ]},
+  { cat:"خواتین", text:"اگر دودھ پلا رہی ہیں تو دودھ کی مقدار کیسی ہے؟",
+    options:[
+      {t:"زیادہ آتا ہے", p:{asabi:1}},
+      {t:"کم آتا ہے", p:{adalati:1}},
+      {t:"لاگو نہیں / معتدل", p:{}}
+    ]}
+];
+
+const pulseQuestions = [
+  { cat:"نبض", text:"نبض کی رفتار (فی منٹ) کیا ہے؟",
+    options:[
+      {t:"70 سے کم", p:{asabi:1}},
+      {t:"70 سے 84 کے درمیان", p:{}},
+      {t:"85 یا اس سے زیادہ", p:{ghudadi:1}},
+      {t:"کبھی کم کبھی زیادہ رہتی ہے", p:{adalati:1}}
+    ]},
+  { cat:"نبض", text:"نبض کا احساس کیسا ہے؟",
+    options:[
+      {t:"نرم اور بھری ہوئی", p:{asabi:1}},
+      {t:"سخت یا خشک محسوس ہوتی ہے", p:{adalati:1}},
+      {t:"گرم محسوس ہوتی ہے", p:{ghudadi:1}}
+    ]},
+  { cat:"نبض", text:"نبض کی رفتار یکساں ہے یا بدلتی رہتی ہے؟",
+    options:[
+      {t:"بالکل یکساں اور ہموار", p:{}},
+      {t:"کبھی تیز کبھی سست", p:{adalati:1}}
+    ]}
+];
+
+document.getElementById('logo-mark-top').innerHTML = LOGO_SVG;
+document.getElementById('logo-mark-hero').innerHTML = LOGO_SVG.replace('width="46" height="46"','width="72" height="72"');
+
+function startQuiz(){
+  current = 0; answers = []; scores = {asabi:0, ghudadi:0, adalati:0};
+  pulseCurrent = 0; pulseAnswers = []; pulseScores = {asabi:0, ghudadi:0, adalati:0};
+  mode = 'symptom';
+  activeQuestions = questions.concat(gender === 'عورت' ? womenQuestions : []);
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function startPulse(){
+  mode = 'pulse'; pulseCurrent = 0;
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderProgress(){
+  const row = document.getElementById('progress-row');
+  row.innerHTML = '';
+  const arr = mode==='pulse' ? pulseQuestions : activeQuestions;
+  const idx = mode==='pulse' ? pulseCurrent : current;
+  arr.forEach((q,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < idx ? ' done' : (i===idx ? ' current' : ''));
+    row.appendChild(d);
+  });
+}
+
+function renderQuestion(){
+  renderProgress();
+  const arr = mode==='pulse' ? pulseQuestions : activeQuestions;
+  const idx = mode==='pulse' ? pulseCurrent : current;
+  const q = arr[idx];
+  document.getElementById('q-category').innerHTML = `<div class="cat-badge">${iconCircle(q.cat)}<span>${q.cat}${mode==='pulse' ? ' (اختیاری)' : ''}</span></div>`;
+  document.getElementById('q-text').textContent = q.text;
+  const wrap = document.getElementById('q-options');
+  wrap.innerHTML = '';
+  q.options.forEach((opt, idx2)=>{
+    const b = document.createElement('button');
+    b.className = 'option';
+    b.textContent = opt.t;
+    b.onclick = ()=>selectOption(idx2);
+    wrap.appendChild(b);
+  });
+}
+
+function selectOption(idx){
+  if(mode==='pulse'){
+    const q = pulseQuestions[pulseCurrent];
+    const opt = q.options[idx];
+    pulseAnswers[pulseCurrent] = opt;
+    for(const k in opt.p){ scores[k] += opt.p[k]; pulseScores[k] += opt.p[k]; }
+    if(pulseCurrent < pulseQuestions.length - 1){ pulseCurrent++; renderQuestion(); }
+    else { showResult(); }
+    return;
+  }
+  const q = activeQuestions[current];
+  const opt = q.options[idx];
+  answers[current] = opt;
+  for(const k in opt.p){ scores[k] += opt.p[k]; }
+  if(current < activeQuestions.length - 1){
+    current++;
+    renderQuestion();
+  } else {
+    showScreen('pulse-intro');
+  }
+}
+
+function skipQuestion(){
+  if(mode==='pulse'){
+    pulseAnswers[pulseCurrent] = {t:"جواب نہیں دیا", p:{}};
+    if(pulseCurrent < pulseQuestions.length - 1){ pulseCurrent++; renderQuestion(); }
+    else { showResult(); }
+    return;
+  }
+  answers[current] = {t:"جواب نہیں دیا", p:{}};
+  if(current < activeQuestions.length - 1){ current++; renderQuestion(); }
+  else { showScreen('pulse-intro'); }
+}
+function goBack(){
+  if(mode==='pulse'){
+    if(pulseCurrent > 0){ pulseCurrent--; renderQuestion(); }
+    return;
+  }
+  if(current > 0){ current--; renderQuestion(); }
+}
+
+/* ---------------- Result data: 6 tehreek types ---------------- */
+const TYPES = {
+  "asabi_adalati": {
+    name:"اعصابی عضلاتی", quality:"تر سرد — کلاسیکی: بلغمی", color:"var(--asabi)",
+    diseases:["سر درد","بار بار نزلہ زکام","رطوبتوں کا زیادہ اخراج","جگر کی کمزوری","ہاضمے کی کمزوری","کم بلڈ پریشر"],
+    treatTowards:"عضلاتی اعصابی + عضلاتی غدی",
+    diet:{ meat:"مچھلی، فارمی مرغی، ہرن کا گوشت", grain:"مکئی، باجرہ، جوار، بیسن کی روٹی", veg:"آلو، مٹر، گوبھی، کریلے، پالک", fruit:"سیب، جامن، مالٹا، خشک انگور", qahwa:"گلِ بنفشہ، عناب، دار چینی" },
+    parhez:"دہی، لسی، ٹھنڈا پانی نہار منہ کی زیادتی",
+    habits:"کولڈ ڈرنکس، زیادہ دیر AC کی براہ راست ہوا"
+  },
+  "adalati_asabi": {
+    name:"عضلاتی اعصابی", quality:"سرد خشک — کلاسیکی: سوداوی", color:"var(--adalati)",
+    diseases:["حلق کی سوزش","سانس کی تکلیف","معدے کا السر","شدید قبض","گردے کی پتھری","بالوں کا گرنا"],
+    treatTowards:"عضلاتی غدی + غدی عضلاتی",
+    diet:{ meat:"ہرن کا گوشت، کبوتر، مرغی، بطخ", grain:"مسور، چنے، بیسن کی روٹی", veg:"کریلے، پالک، سرسوں کا ساگ، میتھی", fruit:"اخروٹ، کشمش، چھوہارے، خشک خوبانی", qahwa:"دار چینی، لونگ، اجوائن" },
+    parhez:"خشک و بھنی اشیاء کی زیادتی، دیر تک بھوکا رہنا",
+    habits:"زیادہ فکر و تفکر، نیند کی کمی"
+  },
+  "adalati_ghudadi": {
+    name:"عضلاتی غدی", quality:"خشک گرم — سوداوی-صفراوی امتزاج", color:"var(--adalati)",
+    diseases:["معدہ و آنتوں کے السر","بواسیر","جگر و گردوں کی سوزش","بے خوابی"],
+    treatTowards:"غدی عضلاتی + غدی اعصابی",
+    diet:{ meat:"مرغی، بطخ، بکری کا گوشت", grain:"مونگ کی دال، جو کی دال، گندم کی روٹی", veg:"میتھی، تارا میرا، کدو، گاجر", fruit:"کھجور، خشک خوبانی، پپیتا، میٹھا آم", qahwa:"اجوائن، پودینہ، ادرک کا قہوہ" },
+    parhez:"مرچ مصالحہ، تلی اشیاء",
+    habits:"زیادہ دھوپ، تمباکو نوشی"
+  },
+  "ghudadi_adalati": {
+    name:"غدی عضلاتی", quality:"گرم خشک — کلاسیکی: صفراوی", color:"var(--ghudadi)",
+    diseases:["دماغی پردے کی سوزش","گرم نزلہ","صفراوی قے","یرقان کا امکان"],
+    treatTowards:"غدی اعصابی + اعصابی غدی",
+    diet:{ meat:"بکری کا گوشت", grain:"مونگ کی دال، گندم کی روٹی، گڑ والے چاول", veg:"کدو، گاجر، ساگ مکو، مولی", fruit:"میٹھا آم، امرود، خوبانی، کیلا", qahwa:"ادرک، سونف، الائچی" },
+    parhez:"مرچ مصالحہ دار، تلی چیزیں",
+    habits:"غصہ و ذہنی دباؤ، دیر رات جاگنا"
+  },
+  "ghudadi_asabi": {
+    name:"غدی اعصابی", quality:"گرم تر — صفراوی-دموی امتزاج", color:"var(--ghudadi)",
+    diseases:["بلند فشارِ خون","سانس میں تکلیف","جسم میں جلن کا احساس"],
+    treatTowards:"اعصابی غدی + اعصابی عضلاتی",
+    diet:{ meat:"خرگوش کا گوشت، مچھلی", grain:"ابلے چاول، جو، مکئی", veg:"کدو، ٹینڈے، کھیرا، آلو", fruit:"تربوز، سیب، جامن، مالٹا", qahwa:"بہی دانہ، گلِ بنفشہ" },
+    parhez:"بہت گرم تاثیر کی اشیاء کی زیادتی",
+    habits:"پانی کی کمی ہونے دینا"
+  },
+  "asabi_ghudadi": {
+    name:"اعصابی غدی", quality:"تر گرم — بلغمی-صفراوی امتزاج", color:"var(--asabi)",
+    diseases:["حقیقی ذیابیطس کا رجحان","موٹاپا","مسلسل پیشاب آنا"],
+    treatTowards:"اعصابی عضلاتی + عضلاتی اعصابی",
+    diet:{ meat:"خرگوش کا گوشت، مچھلی، ترش دہی", grain:"ابلے چاول، جو، مکئی", veg:"کدو، شلجم، آلو، گوبھی", fruit:"تربوز، سیب، فالسہ، انناس", qahwa:"بہی دانہ، تخم خبازی" },
+    parhez:"بہت ٹھنڈی/بہت گرم دونوں انتہائی اشیاء",
+    habits:"بے قاعدہ کھانے کے اوقات"
+  }
+};
+
+function pickType(dom, sec){
+  const key = dom + "_" + sec;
+  if(TYPES[key]) return key;
+  // fallback: reverse
+  const rev = sec + "_" + dom;
+  if(TYPES[rev]) return rev;
+  return "asabi_adalati";
+}
+
+function showResult(){
+  const total = scores.asabi + scores.ghudadi + scores.adalati;
+  const unclear = answers.filter(a => Object.keys(a.p).length===0).length;
+
+  const wrap = document.getElementById('result-content');
+
+  if(total === 0 || unclear >= activeQuestions.length * 0.6){
+    wrap.innerHTML = `
+      <div class="result-banner" style="background:var(--ink-soft)">
+        <div class="label">آپ کا نتیجہ</div>
+        <div class="mizaj-name" style="font-size:1.6rem">⚖️ معتدل مزاج</div>
+      </div>
+      <div class="frame">
+        <p>آپ کے جوابات میں واضح رجحان نظر نہیں آیا۔ ممکن ہے آپ کا مزاج فطری طور پر معتدل ہو، یا آپ فی الحال کسی غیر یقینی کیفیت میں ہوں۔</p>
+        <p>بعض علامات تمام مزاجوں میں مشترک ہوتی ہیں — اس لیے محدود معلومات سے نتیجہ غیر متوقع رہتا ہے۔</p>
+        <div class="section-h"><span class="bar"></span>عمومی مشورے</div>
+        <ul>
+          <li>روزانہ باقاعدہ ورزش اور چہل قدمی</li>
+          <li>خود کو مصروف رکھیں</li>
+          <li>موسم کے مطابق خشک میوہ جات کا اعتدال میں استعمال</li>
+        </ul>
+      </div>
+      <button class="btn ghost" onclick="startQuiz()" style="margin-top:16px">دوبارہ ٹیسٹ دیں</button>
+    `;
+    showScreen('result');
+    return;
+  }
+
+  const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const dom = sorted[0][0], sec = sorted[1][0];
+  const key = pickType(dom, sec);
+  const t = TYPES[key];
+  const barLabel = {asabi:'اعصابی', ghudadi:'غدی', adalati:'عضلاتی'};
+
+  let pulseNote = '';
+  const pulseTotal = pulseScores.asabi + pulseScores.ghudadi + pulseScores.adalati;
+  if(pulseAnswers.length > 0 && pulseTotal > 0){
+    const pulseDom = Object.entries(pulseScores).sort((a,b)=>b[1]-a[1])[0][0];
+    const agree = pulseDom === dom;
+    pulseNote = `<div class="notice${agree?' example':''}" style="margin-top:16px">
+      <strong>🫀 نبض کا نتیجہ:</strong> نبض کی حالت آپ کے علامات والے نتیجے کی ${agree ? 'تائید کرتی ہے ✓' : 'مکمل تائید نہیں کرتی — یہ "' + barLabel[pulseDom] + '" کی طرف زیادہ اشارہ کر رہی ہے'}۔
+    </div>`;
+  }
+
+  const pct = k => total ? Math.round(scores[k]/total*100) : 0;
+  const barColor = {asabi:'var(--asabi)', ghudadi:'var(--ghudadi)', adalati:'var(--adalati)'};
+
+  wrap.innerHTML = `
+    <div class="result-banner" style="background:${t.color}">
+      <div class="label">آپ کا مزاج</div>
+      <div class="mizaj-name">${t.name}</div>
+      <div class="quality">${t.quality}</div>
+    </div>
+
+    <div class="split-bar">
+      ${Object.keys(scores).map(k=>`<span style="width:${pct(k)}%;background:${barColor[k]}"></span>`).join('')}
+    </div>
+    <div class="split-legend">
+      ${Object.keys(scores).map(k=>`<span>${barLabel[k]} ${pct(k)}%</span>`).join('')}
+    </div>
+
+    <div class="section-h"><span class="bar"></span>امکانی رجحان (روایتی نظریے کے مطابق)</div>
+    <div class="chip-row">${t.diseases.map(d=>`<span class="chip">${d}</span>`).join('')}</div>
+
+    <div class="section-h"><span class="bar"></span>علاج بالغذا</div>
+    <p style="font-size:.85rem;color:var(--ink-soft);margin-top:-6px">اصولِ علاج کے مطابق، آپ کی تحریک کا رخ اگلی سمت (${t.treatTowards}) کی طرف موڑا جاتا ہے:</p>
+
+    <details class="accordion" open>
+      <summary><span><span class="diet-icon">${DIET_ICONS.meat}</span>گوشت و حیوانی</span></summary>
+      <div class="acc-body">${t.diet.meat}</div>
+    </details>
+    <details class="accordion">
+      <summary><span><span class="diet-icon">${DIET_ICONS.grain}</span>اناج و دالیں</span></summary>
+      <div class="acc-body">${t.diet.grain}</div>
+    </details>
+    <details class="accordion">
+      <summary><span><span class="diet-icon">${DIET_ICONS.veg}</span>سبزیاں</span></summary>
+      <div class="acc-body">${t.diet.veg}</div>
+    </details>
+    <details class="accordion">
+      <summary><span><span class="diet-icon">${DIET_ICONS.fruit}</span>پھل</span></summary>
+      <div class="acc-body">${t.diet.fruit}</div>
+    </details>
+    <details class="accordion">
+      <summary><span><span class="diet-icon">${DIET_ICONS.qahwa}</span>قہوہ</span></summary>
+      <div class="acc-body">${t.diet.qahwa}</div>
+    </details>
+
+    <div class="section-h"><span class="bar"></span>پرہیز و عادات</div>
+    <p><strong>پرہیز:</strong> ${t.parhez}</p>
+    <p><strong>بند کرنے والی عادات:</strong> ${t.habits}</p>
+
+    <div class="warn-box">
+      <strong>⚠️ اہم:</strong> یہ نتیجہ روایتی قانونِ مفرد اعضاء کے نظریے پر مبنی ایک عمومی رجحان ہے، حتمی طبی تشخیص نہیں۔ دوا شروع کرنے سے پہلے معالج سے مشورہ لازمی ہے۔
+    </div>
+    ${pulseNote}
+
+    <button class="btn" onclick="startQuiz()" style="margin-top:18px">دوبارہ ٹیسٹ دیں</button>
+    <button class="btn ghost" onclick="showScreen('onboarding')">مرکزی صفحہ</button>
+  `;
+  showScreen('result');
+}
+</script>
+
+<!-- ===================== FIREBASE: auth, whitelist, session lock, admin ===================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAI8soifrU1agUQFXe170Wu6lASo38CZG4",
+  authDomain: "mizaajtool.firebaseapp.com",
+  projectId: "mizaajtool",
+  storageBucket: "mizaajtool.firebasestorage.app",
+  messagingSenderId: "190565752299",
+  appId: "1:190565752299:web:e57551a38107fe5bea4dae",
+  measurementId: "G-9W1D9H0Q4V"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+const provider = new GoogleAuthProvider();
+
+let sessionId = null;
+let sessionUnsub = null;
+let pendingAction = null; // 'start' | 'admin'
+let logoTapCount = 0, logoTapTimer = null;
+
+function emailKey(email){
+  // Firestore doc IDs can't contain "/", safe otherwise for emails
+  return email.toLowerCase().trim();
+}
+
+window.handleLogoTap = function(){
+  logoTapCount++;
+  clearTimeout(logoTapTimer);
+  logoTapTimer = setTimeout(()=>{ logoTapCount = 0; }, 2500);
+  if(logoTapCount >= 5){
+    logoTapCount = 0;
+    pendingAction = 'admin';
+    showScreen('login');
+    document.getElementById('login-status').textContent = 'ایڈمن رسائی — اپنے مجاز اکاؤنٹ سے لاگ اِن کریں۔';
+  }
+};
+
+window.requireLoginThenStart = function(){
+  if(auth.currentUser){
+    openStartModal();
+  } else {
+    pendingAction = 'start';
+    document.getElementById('login-status').textContent = '';
+    showScreen('login');
+  }
+};
+
+window.signInGoogle = async function(){
+  const statusEl = document.getElementById('login-status');
+  try{
+    statusEl.textContent = 'لاگ اِن ہو رہا ہے...';
+    await signInWithPopup(auth, provider);
+    // onAuthStateChanged handles the rest
+  }catch(err){
+    statusEl.textContent = 'لاگ اِن ناکام ہوا — دوبارہ کوشش کریں۔';
+    console.error(err);
+  }
+};
+
+window.signOutUser = async function(){
+  if(sessionUnsub){ sessionUnsub(); sessionUnsub = null; }
+  await signOut(auth);
+  showScreen('onboarding');
+};
+
+async function establishSessionLock(user){
+  sessionId = crypto.randomUUID();
+  const ref = doc(db, "allowedUsers", emailKey(user.email));
+  await setDoc(ref, { activeSession: sessionId, lastLogin: Date.now(), email: user.email }, { merge: true });
+  if(sessionUnsub) sessionUnsub();
+  sessionUnsub = onSnapshot(ref, (snap)=>{
+    const data = snap.data();
+    if(data && data.activeSession && data.activeSession !== sessionId){
+      alert('آپ کا اکاؤنٹ کسی دوسرے آلے پر لاگ اِن ہو گیا ہے — اس لیے یہاں سیشن ختم کیا جا رہا ہے۔');
+      window.signOutUser();
+    }
+  });
+}
+
+async function isAdmin(user){
+  try{
+    const ref = doc(db, "admins", emailKey(user.email));
+    const snap = await getDoc(ref);
+    return snap.exists();
+  }catch(e){ return false; }
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  const statusEl = document.getElementById('login-status');
+  if(!user) return;
+
+  if(pendingAction === 'admin'){
+    const admin = await isAdmin(user);
+    if(admin){
+      document.getElementById('admin-gate').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      document.getElementById('admin-email').textContent = user.email;
+      loadAdminList();
+      showScreen('admin');
+    } else {
+      if(statusEl) statusEl.textContent = 'یہ اکاؤنٹ ایڈمن کے لیے مجاز نہیں۔';
+      await signOut(auth);
+    }
+    pendingAction = null;
+    return;
+  }
+
+  // normal user flow: check whitelist
+  if(statusEl) statusEl.textContent = 'رسائی کی جانچ ہو رہی ہے...';
+  try{
+    const ref = doc(db, "allowedUsers", emailKey(user.email));
+    const snap = await getDoc(ref);
+    if(snap.exists()){
+      await establishSessionLock(user);
+      document.getElementById('auth-btn').textContent = '✓ ' + user.email.split('@')[0];
+      openStartModal();
+    } else {
+      if(statusEl) statusEl.textContent = 'یہ جی میل اکاؤنٹ اس ٹول کے لیے رجسٹرڈ نہیں۔ خریداری کے بعد رسائی فعال کی جائے گی۔';
+      await signOut(auth);
+    }
+  }catch(e){
+    if(statusEl) statusEl.textContent = 'خرابی — دوبارہ کوشش کریں۔';
+    console.error(e);
+  }
+});
+
+/* ---------------- Admin panel logic ---------------- */
+window.adminAddEmail = async function(){
+  const input = document.getElementById('admin-new-email');
+  const email = input.value.trim();
+  if(!email || !email.includes('@')){ alert('درست جی میل ایڈریس لکھیں'); return; }
+  await setDoc(doc(db, "allowedUsers", emailKey(email)), { email: email, addedAt: Date.now(), activeSession: null });
+  input.value = '';
+  loadAdminList();
+};
+
+window.adminRemoveEmail = async function(id){
+  if(!confirm('کیا واقعی اس جی میل کو فہرست سے ہٹانا ہے؟')) return;
+  await deleteDoc(doc(db, "allowedUsers", id));
+  loadAdminList();
+};
+
+async function loadAdminList(){
+  const listEl = document.getElementById('admin-list');
+  listEl.innerHTML = 'لوڈ ہو رہا ہے...';
+  const snap = await getDocs(collection(db, "allowedUsers"));
+  if(snap.empty){ listEl.innerHTML = '<p style="color:var(--ink-soft)">ابھی فہرست خالی ہے۔</p>'; return; }
+  listEl.innerHTML = '';
+  snap.forEach(d=>{
+    const data = d.data();
+    const row = document.createElement('div');
+    row.className = 'accordion';
+    row.style.padding = '10px 14px';
+    row.style.display = 'flex';
+    row.style.justifyContent = 'space-between';
+    row.style.alignItems = 'center';
+    row.innerHTML = `<span style="font-family:sans-serif;font-size:.85rem">${data.email || d.id}</span>`;
+    const btn = document.createElement('button');
+    btn.textContent = 'ہٹائیں';
+    btn.style.cssText = 'background:var(--adalati);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-family:sans-serif;font-size:.78rem;cursor:pointer';
+    btn.onclick = ()=>adminRemoveEmail(d.id);
+    row.appendChild(btn);
+    listEl.appendChild(row);
+  });
+}
+</script>
+</body>
+</html>
