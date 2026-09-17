@@ -1106,7 +1106,7 @@ import {
   getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, getDocs
+  getFirestore, doc, getDoc, getDocFromServer, setDoc, deleteDoc, onSnapshot, collection, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1190,9 +1190,10 @@ async function establishSessionLock(user){
 
 async function isAdmin(user){
   try{
-    const ref = doc(db, "admins", emailKey(user.email));
-    const snap = await getDoc(ref);
-    return { ok: snap.exists() };
+    const key = emailKey(user.email);
+    const ref = doc(db, "admins", key);
+    const snap = await getDocFromServer(ref);
+    return { ok: snap.exists(), path: 'admins/' + key };
   }catch(e){
     console.error('isAdmin error:', e);
     return { ok:false, error: (e && e.code) ? e.code : String(e) };
@@ -1212,7 +1213,7 @@ onAuthStateChanged(auth, async (user)=>{
       loadAdminList();
       showScreen('admin');
     } else {
-      if(statusEl) statusEl.textContent = 'یہ اکاؤنٹ ایڈمن کے لیے مجاز نہیں۔ (لاگ اِن جی میل: ' + user.email + (result.error ? ' — خرابی: ' + result.error : '') + ')';
+      if(statusEl) statusEl.textContent = 'یہ اکاؤنٹ ایڈمن کے لیے مجاز نہیں۔ (چیک کی گئی جگہ: ' + result.path + (result.error ? ' — خرابی: ' + result.error : ' — دستاویز نہیں ملی') + ')';
       await signOut(auth);
     }
     pendingAction = null;
@@ -1223,7 +1224,7 @@ onAuthStateChanged(auth, async (user)=>{
   if(statusEl) statusEl.textContent = 'رسائی کی جانچ ہو رہی ہے...';
   try{
     const ref = doc(db, "allowedUsers", emailKey(user.email));
-    const snap = await getDoc(ref);
+    const snap = await getDocFromServer(ref);
     if(snap.exists()){
       await establishSessionLock(user);
       document.getElementById('auth-btn').textContent = '✓ ' + user.email.split('@')[0];
