@@ -1192,8 +1192,11 @@ async function isAdmin(user){
   try{
     const ref = doc(db, "admins", emailKey(user.email));
     const snap = await getDoc(ref);
-    return snap.exists();
-  }catch(e){ return false; }
+    return { ok: snap.exists() };
+  }catch(e){
+    console.error('isAdmin error:', e);
+    return { ok:false, error: (e && e.code) ? e.code : String(e) };
+  }
 }
 
 onAuthStateChanged(auth, async (user)=>{
@@ -1201,15 +1204,15 @@ onAuthStateChanged(auth, async (user)=>{
   if(!user) return;
 
   if(pendingAction === 'admin'){
-    const admin = await isAdmin(user);
-    if(admin){
+    const result = await isAdmin(user);
+    if(result.ok){
       document.getElementById('admin-gate').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       document.getElementById('admin-email').textContent = user.email;
       loadAdminList();
       showScreen('admin');
     } else {
-      if(statusEl) statusEl.textContent = 'یہ اکاؤنٹ ایڈمن کے لیے مجاز نہیں۔';
+      if(statusEl) statusEl.textContent = 'یہ اکاؤنٹ ایڈمن کے لیے مجاز نہیں۔ (لاگ اِن جی میل: ' + user.email + (result.error ? ' — خرابی: ' + result.error : '') + ')';
       await signOut(auth);
     }
     pendingAction = null;
@@ -1226,11 +1229,11 @@ onAuthStateChanged(auth, async (user)=>{
       document.getElementById('auth-btn').textContent = '✓ ' + user.email.split('@')[0];
       openStartModal();
     } else {
-      if(statusEl) statusEl.textContent = 'یہ جی میل اکاؤنٹ اس ٹول کے لیے رجسٹرڈ نہیں۔ خریداری کے بعد رسائی فعال کی جائے گی۔';
+      if(statusEl) statusEl.textContent = 'یہ جی میل اکاؤنٹ اس ٹول کے لیے رجسٹرڈ نہیں۔ (لاگ اِن جی میل: ' + user.email + ')';
       await signOut(auth);
     }
   }catch(e){
-    if(statusEl) statusEl.textContent = 'خرابی — دوبارہ کوشش کریں۔';
+    if(statusEl) statusEl.textContent = 'خرابی — ' + ((e && e.code) ? e.code : String(e));
     console.error(e);
   }
 });
