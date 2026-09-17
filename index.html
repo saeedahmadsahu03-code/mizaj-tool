@@ -848,6 +848,13 @@ const pulseQuestions = [
 document.getElementById('logo-mark-top').innerHTML = LOGO_SVG;
 document.getElementById('logo-mark-hero').innerHTML = LOGO_SVG.replace('width="46" height="46"','width="72" height="72"');
 
+// convenience/testing path: open link ending in #admin to reach admin login directly
+if(window.location.hash === '#admin'){
+  pendingAction = 'admin';
+  document.getElementById('login-status').textContent = 'ایڈمن رسائی — اپنے مجاز اکاؤنٹ سے لاگ اِن کریں۔';
+  setTimeout(()=>showScreen('login'), 50);
+}
+
 function startQuiz(){
   current = 0; answers = []; scores = {asabi:0, ghudadi:0, adalati:0};
   pulseCurrent = 0; pulseAnswers = []; pulseScores = {asabi:0, ghudadi:0, adalati:0};
